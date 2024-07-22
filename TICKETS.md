@@ -8,6 +8,8 @@ interact with your API.
 
 ## Key Requirements
 
+### Authentication
+
 1. Finish implementing Login Functionality (Severus has been drawn to another project!)
 - [ ] Implement the `logIn` action in the `UserController` to authenticate users
   using their username and password.
@@ -18,7 +20,7 @@ interact with your API.
 
 <!-- OMITTED -->
 
-## Items
+### Items
 
 This is an e-commerce website, but we have no products yet! We need some sort
 Item entity introduced in our application. It should have the following
@@ -29,7 +31,7 @@ We need to fully build our app so that our users can:
 - [ ] Fetch a particular item by it's ID.
 
 
-## Cart
+### Cart
 
 We would like our users to be able to add, remove and view items to their cart. 
 
