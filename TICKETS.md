@@ -40,7 +40,7 @@ We would like our users to be able to add, remove and view items to their cart.
 
 ## Stretch
 
-**Location**
+### Location
 
 The marketplace is so far global we can assume. However, we'd like to start
 targeting specific regions and advertising our products in these regions only.
@@ -51,7 +51,7 @@ The idea is that we are able to:
 - [ ] Fetch all Items available in a particular location (either by name or id).
 - [ ] Fetch all locations in a given country (e.g. "ES", "UK", "US", "FR").
 
-**Payments (only backend)**
+### Payments (only backend)
 
 Implementing a fictional payment system will involve creating a basic checkout
 process and simulating payment processing. Here are more detailed tasks:
@@ -73,7 +73,7 @@ process and simulating payment processing. Here are more detailed tasks:
 - [ ] Create an endpoint to initiate a payment. This endpoint should receive
   order details and return a confirmation.
 
-**Extension research**
+### Extension research
 
 :bulb: How can you ensure payment info is as secure as possible? Should you use
 a third party?
