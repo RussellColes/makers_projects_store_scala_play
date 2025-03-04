@@ -26,6 +26,10 @@ class UserDAO @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec: E
     db.run(users.filter(_.username === username).result.headOption)
   }
 
+  def clearUsers(): Future[Int] = {
+    db.run(sqlu"TRUNCATE TABLE users")
+  }
+
   private class Users(tag: Tag) extends Table[User](tag, "users") {
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
     def username = column[String]("username")
