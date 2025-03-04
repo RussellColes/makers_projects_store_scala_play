@@ -30,8 +30,8 @@ class CartDAO @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec: E
   }
 
   // Find cart by userId
-  def findByUserId(userId: Long): Future[Option[Cart]] = {
-    val findByUserIdQuery = Carts.table.filter(_.userId === userId).result.headOption
+  def findByUserId(userId: Long): Future[Seq[Cart]] = {
+    val findByUserIdQuery = Carts.table.filter(_.userId === userId).result
     db.run(findByUserIdQuery)
   }
 
