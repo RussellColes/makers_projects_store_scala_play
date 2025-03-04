@@ -122,4 +122,37 @@ class UserControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injectin
       jsonBody("message").as[String] mustBe ("Password must contain more than 8 characters and a special character")
     }
   }
+  "UserController POST /logIn" should {
+    "log in and put username in session" in {
+      val userDAO = inject[UserDAO]
+      val userController = new UserController(stubControllerComponents(), userDAO)(inject[ExecutionContext])
+
+      val request = FakeRequest(POST, "/signUp")
+        .withJsonBody(Json.obj(
+          "username" -> "alan",
+          "email" -> "alan2@gmail.com",
+          "password" -> "password$")
+        )
+        .withCSRFToken
+
+      await(call(userController.signUp, request))
+
+      val requestLogin = FakeRequest(POST, "/logIn")
+        .withJsonBody(Json.obj(
+          "username" -> "alan",
+          "password" -> "password$")
+        )
+        .withCSRFToken
+
+      val result = call(userController.logIn, requestLogin)
+      status(result) mustBe OK
+      val jsonBody = contentAsJson(result)
+//      jsonBody("message").as[String] mustBe ("Password must contain more than 8 characters and a special character")
+      println(jsonBody)
+
+      session(result).get("username") mustBe Some("alan")
+      session(result).get("userId") mustBe Some("1")
+    }
+
+  }
 }

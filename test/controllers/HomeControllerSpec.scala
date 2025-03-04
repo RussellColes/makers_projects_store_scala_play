@@ -1,9 +1,21 @@
 package controllers
 
+import daos.UserDAO
+import models.Users
 import org.scalatestplus.play._
 import org.scalatestplus.play.guice._
 import play.api.test._
 import play.api.test.Helpers._
+import org.scalatest.BeforeAndAfterEach
+import play.api.libs.json.Json
+import play.api.test.CSRFTokenHelper.CSRFRequest
+import play.api.Play.materializer
+import play.api.mvc.Session
+
+import scala.concurrent.Await
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext
+
 
 /**
  * Add your spec here.
@@ -11,7 +23,8 @@ import play.api.test.Helpers._
  *
  * For more information, see https://www.playframework.com/documentation/latest/ScalaTestingWithScalaTest
  */
-class HomeControllerSpec extends PlaySpec with GuiceOneAppPerTest with Injecting {
+class HomeControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injecting with BeforeAndAfterEach {
+
 
   "HomeController GET" should {
 

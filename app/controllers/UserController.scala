@@ -28,6 +28,10 @@ class UserController @Inject()(cc: ControllerComponents, userDAO: UserDAO)(impli
     Ok(views.html.signup(""))
   }
 
+  def showLogInForm = Action { implicit request: Request[AnyContent] =>
+    Ok(views.html.login(""))
+  }
+
 // CHECK USERNAME HELPER FUNCTIONS
   private def usernameIsFree (username: String): Future[Boolean] = {
     val findUserByUsername = userDAO.findUserByUsername(username)
@@ -106,12 +110,17 @@ class UserController @Inject()(cc: ControllerComponents, userDAO: UserDAO)(impli
     }
   }
 
-  def logIn = Action.async(parse.json) { implicit request =>
+  def logIn = Action.async(parse.json) {
+    implicit request =>
     (request.body \ "username").asOpt[String].zip((request.body \ "password").asOpt[String]).map {
       case (username, password) =>
         userDAO.findUserByUsername(username).map {
           case Some(user) if BCrypt.checkpw(password, user.password) =>
             Ok(Json.obj("status" -> "success", "message" -> "Logged in"))
+              .withSession(
+                "userId" -> user.id.map(_.toString).getOrElse("0"),
+                "username" -> user.username
+              )
           case _ => Unauthorized(Json.obj("status" -> "error", "message" -> "Invalid credentials"))
         }
     }.getOrElse(Future.successful(BadRequest("Invalid login data")))

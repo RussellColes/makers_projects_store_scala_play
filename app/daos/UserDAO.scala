@@ -4,6 +4,7 @@ import models.{User, Users}
 import org.mindrot.jbcrypt.BCrypt
 import play.api.db.slick.DatabaseConfigProvider
 import slick.jdbc.JdbcProfile
+//import scala.concurrent.ExecutionContext.Implicits.global
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -23,11 +24,18 @@ class UserDAO @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec: E
   }
 
   def findUserByUsername(username: String): Future[Option[User]] = {
-    db.run(users.filter(_.username === username).result.headOption)
+    val query = db.run(users.filter(_.username === username).result.headOption)
+    query.map { userOpt =>
+      println(s"Database result: $userOpt")  // Print the actual result
+      userOpt
+      }
+
+//    println(db.run(users.filter(_.username === username).result.headOption))
+//    db.run(users.filter(_.username === username).result.headOption)
   }
 
   def clearUsers(): Future[Int] = {
-    db.run(sqlu"TRUNCATE TABLE users")
+    db.run(sqlu"TRUNCATE TABLE users RESTART IDENTITY")
   }
 
   private class Users(tag: Tag) extends Table[User](tag, "users") {
