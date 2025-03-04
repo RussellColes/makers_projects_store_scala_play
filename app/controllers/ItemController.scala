@@ -15,6 +15,15 @@ import org.mindrot.jbcrypt.BCrypt
 @Singleton
 class ItemController @Inject()(cc: ControllerComponents, itemDAO: ItemDAO)(implicit ec: ExecutionContext) extends AbstractController(cc) {
 
+  def getAllItems() = Action.async {
+    implicit  request: Request[AnyContent] =>
+      itemDAO.getAllItems().map {items =>
+        println(items)
+//        Ok(Json.toJson(items))
+        Ok(views.html.items(items))
+      }
+  }
+
   def findItemById(id: Long) = Action.async {
     implicit request: Request[AnyContent] =>
       itemDAO.findItemById(id).map {

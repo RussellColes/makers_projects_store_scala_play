@@ -31,6 +31,10 @@ class ItemDAO @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec: E
 //    db.run(items.filter(_.name === name).result.headOption) // maybe remove headOption if we want to return everything
 //  }
 
+  def getAllItems(): Future[Seq[Item]] = {
+    db.run(items.result)
+  }
+
   def findItemById(id: Long): Future[Option[Item]] = {
     db.run(items.filter(_.id === id).result.headOption)
   }
