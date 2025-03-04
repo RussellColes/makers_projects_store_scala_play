@@ -8,6 +8,7 @@ GET     /                           controllers.HomeController.index()
 GET     /signup                     controllers.UserController.showSignUpForm()
 POST    /signup                     controllers.UserController.signUp()
 POST    /login                      controllers.UserController.logIn()
+GET     /items/:id                  controllers.ItemController.findItemById(id: Long)
 
 
 # Map static resources from the /public folder to the /assets URL path

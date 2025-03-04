@@ -22,13 +22,19 @@ class ItemDAO @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec: E
 //    db.run(users returning users.map(_.id) += userWithHashedPassword)
 //  }
 
-  def findItemByName(name: String): Future[Option[Item]] = {
-    db.run(items.filter(_.name === name).result.headOption) // maybe remove headOption if we want to return everything
+//  https://scala-slick.org/doc/3.0.0/dbio.html?highlight=action
+//  def getAllItems(): Future[Seq[Item]] = {
+//    db.run(items.result)
+//  }
+
+//  def findItemByName(name: String): Future[Option[Item]] = {
+//    db.run(items.filter(_.name === name).result.headOption) // maybe remove headOption if we want to return everything
+//  }
+
+  def findItemById(id: Long): Future[Option[Item]] = {
+    db.run(items.filter(_.id === id).result.headOption)
   }
 
-//  def findItemById(id: String): Future[Option[Item]] = {
-//    db.run(items.filter(_.name === name).result.headOption)
-//  }
 
   private class Items(tag: Tag) extends Table[Item](tag, "items") {
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
