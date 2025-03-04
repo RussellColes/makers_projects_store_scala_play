@@ -16,13 +16,13 @@ object Item {
 class Items(tag: Tag) extends Table[Item](tag, "items") {
   def id: Rep[Long] = column[Long]("id", O.PrimaryKey, O.AutoInc)
   def name: Rep[String] = column[String]("name")
-  def price: Rep[Double] = column[String]("price") // come back here
+  def price: Rep[Double] = column[Double]("price") // I've changed String to Double
   def description: Rep[String] = column[String]("description")
 
   def * : ProvenShape[Item] = (id.?, name, price, description) <> ((Item.apply _).tupled, Item.unapply)
 }
 
-// Companion object for Users table
+// Companion object for Items table
 object Items {
   val table = TableQuery[Items]
 }
