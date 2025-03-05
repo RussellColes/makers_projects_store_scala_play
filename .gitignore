@@ -6,6 +6,5 @@ target
 /.classpath
 /.project
 /.settings
-/RUNNING_PID
 
 conf/application.local.conf

@@ -16,6 +16,7 @@ class ItemDAO @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec: E
 
   val items = Items.table
 
+
 //  def addUser(item: Item): Future[Long] = {
 //    val hashedPassword = BCrypt.hashpw(user.password, BCrypt.gensalt())
 //    val userWithHashedPassword = user.copy(password = hashedPassword)
@@ -46,6 +47,7 @@ class ItemDAO @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec: E
     def price = column[Double]("price")
     def description = column[String]("description")
 
+
 //    The * projection of the table used as default for queries and inserts.
 //    Should include all columns as a tuple, HList or custom shape and optionally map them to a custom entity type using the <> operator.
 //    The ProvenShape return type ensures that there is a Shape available for translating between the Column-based type in *
@@ -53,3 +55,4 @@ class ItemDAO @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec: E
     def * = (id.?, name, price, description) <> ((Item.apply _).tupled, Item.unapply)
   }
 }
+
