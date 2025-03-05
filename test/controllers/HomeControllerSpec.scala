@@ -10,6 +10,7 @@ import org.scalatest.BeforeAndAfterEach
 import play.api.libs.json.Json
 import play.api.test.CSRFTokenHelper.CSRFRequest
 import play.api.Play.materializer
+import play.api.mvc.AnyContentAsEmpty
 import play.api.mvc.Session
 
 import scala.concurrent.Await
@@ -25,12 +26,15 @@ import scala.concurrent.ExecutionContext
  */
 class HomeControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injecting with BeforeAndAfterEach {
 
+    val authenticatedRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest(GET, "/")
+      .withSession("userId" -> "123", "username" -> "alan")
+
 
   "HomeController GET" should {
 
     "render the index page from a new instance of controller" in {
       val controller = new HomeController(stubControllerComponents())
-      val home = controller.index().apply(FakeRequest(GET, "/"))
+      val home = controller.index().apply(authenticatedRequest)
 
       status(home) mustBe OK
       contentType(home) mustBe Some("text/html")
@@ -39,7 +43,7 @@ class HomeControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injectin
 
     "render the index page from the application" in {
       val controller = inject[HomeController]
-      val home = controller.index().apply(FakeRequest(GET, "/"))
+      val home = controller.index().apply(authenticatedRequest)
 
       status(home) mustBe OK
       contentType(home) mustBe Some("text/html")
@@ -47,7 +51,7 @@ class HomeControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injectin
     }
 
     "render the index page from the router" in {
-      val request = FakeRequest(GET, "/")
+      val request = authenticatedRequest
       val home = route(app, request).get
 
       status(home) mustBe OK
