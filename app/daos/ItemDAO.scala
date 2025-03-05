@@ -40,19 +40,26 @@ class ItemDAO @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec: E
     db.run(items.filter(_.id === id).result.headOption)
   }
 
+  def createItem(item: Item): Future[Long] = {
+//    db.run(items.insertOrUpdate(item: Item))
+    db.run(items returning items.map(_.id) += item)
+  }
+
 
   private class Items(tag: Tag) extends Table[Item](tag, "items") {
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
     def name = column[String]("name")
     def price = column[Double]("price")
     def description = column[String]("description")
+    def location = column[String]("location")
+    def country = column[String]("country")
 
 
 //    The * projection of the table used as default for queries and inserts.
 //    Should include all columns as a tuple, HList or custom shape and optionally map them to a custom entity type using the <> operator.
 //    The ProvenShape return type ensures that there is a Shape available for translating between the Column-based type in *
 //    and the client-side type without Column in the table's type parameter.
-    def * = (id.?, name, price, description) <> ((Item.apply _).tupled, Item.unapply)
+    def * = (id.?, name, price, description, location, country) <> ((Item.apply _).tupled, Item.unapply)
   }
 }
 
