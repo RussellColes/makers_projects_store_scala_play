@@ -1,6 +1,6 @@
 package controllers
 
-import daos.CartDAO
+import daos.{CartDAO, CartItemDAO}
 import models.Cart
 
 import javax.inject._
@@ -13,12 +13,16 @@ import java.sql.Timestamp
 import java.time.Instant
 
 @Singleton
-class CartController @Inject()(cc: ControllerComponents, cartDAO: CartDAO)(implicit ec: ExecutionContext) extends AbstractController(cc)  {
+class CartController @Inject()(cc: ControllerComponents, cartDAO: CartDAO, cartItemDAO: CartItemDAO)(implicit ec: ExecutionContext) extends AbstractController(cc)  {
 
 
   def createCart: Action[JsValue] = Action.async(parse.json) { implicit request =>
+    request.session.get("userId") match {
+      case Some(userIdStr) =>
+        val userId = userIdStr.toLong
+    }
       val json = request.body.as[JsObject]
-      val userId: Option[Long] = (json \ "userId").asOpt[Long]
+//      val userId: Option[Long] = (json \ "userId").asOpt[Long]
       val now = Timestamp.from(Instant.now())
     
       val cart = Cart(None, userId, Some(now), Some(now))
