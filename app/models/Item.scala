@@ -5,7 +5,7 @@ import slick.jdbc.PostgresProfile.api._
 import slick.lifted.{ProvenShape, Tag}
 
 // Item case class
-case class Item(id: Option[Long], name: String, price: Double, description: String)
+case class Item(id: Option[Long], name: String, price: Double, description: String, location: String, country: String)
 
 // Companion object for Item
 object Item {
@@ -18,8 +18,10 @@ class Items(tag: Tag) extends Table[Item](tag, "items") {
   def name: Rep[String] = column[String]("name")
   def price: Rep[Double] = column[Double]("price") // I've changed String to Double
   def description: Rep[String] = column[String]("description")
+  def location: Rep[String] = column[String]("location")
+  def country: Rep[String] = column[String]("country")
 
-  def * : ProvenShape[Item] = (id.?, name, price, description) <> ((Item.apply _).tupled, Item.unapply)
+  def * : ProvenShape[Item] = (id.?, name, price, description, location, country) <> ((Item.apply _).tupled, Item.unapply)
 }
 
 // Companion object for Items table

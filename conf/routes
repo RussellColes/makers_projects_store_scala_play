@@ -19,7 +19,9 @@ GET     /login                      controllers.UserController.showLogInForm()
 # Routes for item
 GET     /items/:id                  controllers.ItemController.findItemById(id: Long)
 GET     /items                      controllers.ItemController.getAllItems()
-
+POST    /items                      controllers.ItemController.createItem()
+DELETE  /items/:id                  controllers.ItemController.deleteItem(id: Long)
+PUT     /items/:id                  controllers.ItemController.updateItem(id: Long)
 
 
 # Map static resources from the /public folder to the /assets URL path
