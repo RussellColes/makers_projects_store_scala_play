@@ -45,6 +45,19 @@ class ItemDAO @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec: E
     db.run(items returning items.map(_.id) += item)
   }
 
+  def deleteItem(id: Long): Future[Int] = {
+    db.run(items.filter(_.id === id).delete)
+  }
+
+  def updateItem(id: Long, updatedItem: Item): Future[Int] = {
+    db.run(
+      items.filter(_.id === id)
+        .map(item => (item.name, item.price, item.description, item.location, item.country)) // Adjust fields based on your schema
+        .update((updatedItem.name, updatedItem.price, updatedItem.description, updatedItem.location, updatedItem.country))
+    )
+  }
+
+
 
   private class Items(tag: Tag) extends Table[Item](tag, "items") {
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)

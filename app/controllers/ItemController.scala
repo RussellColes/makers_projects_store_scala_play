@@ -73,4 +73,46 @@ def createItem = Action.async(parse.json) { implicit request =>
   )
 }
 
+//  def deleteItem(id: Long) = Action.async {
+//    implicit request: Request[AnyContent] =>
+//      itemDAO.findItemById(id).map {
+//        case Some(item) =>
+//          println(item.id)
+//          Ok(Json.toJson(item))
+//        case None =>
+//          NotFound(Json.obj("message" -> s"Item with id $id not found"))
+//      }
+//  }
+
+  def deleteItem(id: Long) = Action.async {
+    implicit request: Request[AnyContent] =>
+      itemDAO.findItemById(id).flatMap {
+        case Some(item) =>
+          itemDAO.deleteItem(id).map { _ =>
+            NoContent // HTTP 204, successful deletion with no response body
+          }
+        case None =>
+          Future.successful(NotFound(Json.obj("message" -> s"Item with id $id not found")))
+      }
+  }
+
+  def updateItem(id: Long) = Action.async(parse.json) { implicit request =>
+    request.body.validate[Item].fold(
+      errors => Future.successful(BadRequest(Json.obj("message" -> "Invalid JSON"))),
+      updatedItem => {
+        itemDAO.findItemById(id).flatMap {
+          case Some(_) =>
+            itemDAO.updateItem(id, updatedItem).map { rowsUpdated =>
+              if (rowsUpdated > 0) Ok(Json.obj("message" -> "Item updated successfully"))
+              else InternalServerError(Json.obj("message" -> "Failed to update item"))
+            }
+          case None =>
+            Future.successful(NotFound(Json.obj("message" -> s"Item with id $id not found")))
+        }
+      }
+    )
+  }
+
+
+
 }
