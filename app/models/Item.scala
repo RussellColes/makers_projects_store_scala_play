@@ -25,4 +25,5 @@ class Items(tag: Tag) extends Table[Item](tag, "items") {
 // Companion object for Items table
 object Items {
   val table = TableQuery[Items]
+
 }
