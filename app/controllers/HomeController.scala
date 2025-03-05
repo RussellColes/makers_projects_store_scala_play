@@ -19,6 +19,10 @@ class HomeController @Inject()(val controllerComponents: ControllerComponents) e
    * a path of `/`.
    */
   def index() = Action { implicit request: Request[AnyContent] =>
-    Ok(views.html.index())
+    request.session.get("userId") match {
+      case Some(_)    => Ok(views.html.index())
+      case None => Redirect(routes.UserController.logIn())
+    }
+
   }
 }
