@@ -1,0 +1,45 @@
+@(cartItems: Seq[models.CartItemView])(implicit request: RequestHeader)
+
+@main("mycart") {
+<div class="container mt-4">
+  <h1>Your Shopping Cart</h1>
+  <table class="table table-striped">
+    <thead>
+    <tr>
+      <th scope="col">Product</th>
+      <th scope="col">Quantity</th>
+      <th scope="col">Price</th>
+      <th scope="col">Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    @for(item <- cartItems) {
+    <tr>
+      <td>@item.productName</td>
+      <td>
+        <form action="@routes.CartController.updateCartItem(item.id)" method="post" class="form-inline">
+          <div class="container">
+            <div class="d-flex align-items-center">
+              <input type="number" name="quantity" value="@item.quantity" min="1" class="form-control me-2" style="width: 80px;">
+              <button type="submit" class="btn btn-primary btn-sm">Update</button>
+            </div>
+          </div>
+        </form>
+      </td>
+      <td>$@item.price</td>
+      <td>
+        <form action="@routes.CartController.deleteCartItem(item.id)" method="post" style="display:inline;">
+          <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+        </form>
+      </td>
+    </tr>
+    }
+    </tbody>
+  </table>
+
+  <div class="mt-4">
+    <a href="" class="btn btn-secondary">Back to Shopping</a>
+    <a href="" class="btn btn-success">Checkout</a>
+  </div>
+</div>
+}

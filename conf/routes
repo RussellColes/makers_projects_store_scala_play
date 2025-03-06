@@ -9,9 +9,13 @@ GET     /signup                     controllers.UserController.showSignUpForm()
 POST    /signup                     controllers.UserController.signUp()
 POST    /login                      controllers.UserController.logIn()
 
+# Routs for cart
+GET     /mycart                     controllers.CartController.myCart()
 GET     /carts/:id                  controllers.CartController.getCartById(id: Long)
 GET     /carts/users/:userId        controllers.CartController.getCartByUserId(userId: Long)
 POST    /carts                      controllers.CartController.createCart()
+POST    /carts/items/:id/update     controllers.CartController.updateCartItem(id: Long)
+POST    /carts/items/:id/delete     controllers.CartController.deleteCartItem(id: Long)
 
 GET     /login                      controllers.UserController.showLogInForm()
 
@@ -20,7 +24,8 @@ GET     /login                      controllers.UserController.showLogInForm()
 GET     /items/:id                  controllers.ItemController.findItemById(id: Long)
 GET     /items                      controllers.ItemController.getAllItems()
 
-
+# CSRF issuer for testing
+GET     /csrf                       controllers.CSRFController.csrfToken()
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
