@@ -4,7 +4,8 @@ CREATE TABLE orders (
     id SERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
     order_status VARCHAR(50) NOT NULL,
-    ordered_at TIMESTAMP DEFAULT NOW()
+    ordered_at TIMESTAMP DEFAULT NOW(),
+    total_amount NUMERIC(10,2) NOT NULL
 );
 
 CREATE TABLE order_items (

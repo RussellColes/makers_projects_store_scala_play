@@ -1,7 +1,7 @@
 package controllers
 
-import daos.{DbDAO, PaymentDAO, UserDAO}
-import models.Users
+import daos.{DbDAO, OrderDAO, PaymentDAO, UserDAO}
+import models.{Order, User}
 import org.scalatestplus.play._
 import org.scalatestplus.play.guice._
 import play.api.Play.materializer
@@ -17,6 +17,8 @@ import slick.lifted.TableQuery
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.play.PlaySpec
 
+import java.sql.Timestamp
+import java.time.Instant
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext
@@ -39,6 +41,17 @@ class PaymentControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injec
       )
       .withCSRFToken
     Await.result(call(userController.signUp, request), 100.seconds)
+
+    //    def createOrder(order: Order)
+    val orderDAO = inject[OrderDAO]
+    val order = Order(
+      id = None,
+      userId = 1,
+      orderStatus = "pending",
+      orderedAt = None,
+      totalAmount =  1000.00
+    )
+    Await.result(orderDAO.createOrder(order), 10.seconds)
     super.beforeEach()
   }
   "PaymentController POST /createPayment" should {
