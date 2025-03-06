@@ -1,6 +1,6 @@
 package daos
 
-import models.{Cart, Carts}
+import models.{Cart, Carts, Orders}
 import play.api.db.slick.DatabaseConfigProvider
 import slick.jdbc.JdbcProfile
 
@@ -15,7 +15,6 @@ class CartDAO @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec: E
 
   val carts = Carts.table
 
-  // TBC: I'm expecting to see the cart instance in response instead of just an id. Hope it works ;)
   def createCart(cart: Cart): Future[Cart] = {
     val createQuery = (Carts.table returning Carts.table.map(_.id)
       into ((cart, id) => cart.copy(id = Some(id)))
