@@ -38,8 +38,15 @@ class PaymentController @Inject()(cc: ControllerComponents, paymentDAO: PaymentD
   }
 
   def findPaymentById(id: Long): Future[Result] = {
-    Future.successful(NotImplemented)
+    val payment = paymentDAO.findPaymentById(id)
+    payment.map {
+      case Some(payment2) =>
+//        println(payment2.amount)
+        Ok(Json.obj("status" -> "success", "message" -> "payment found", "payment" -> Json.toJson(payment2)))
+      case _ => BadRequest(Json.obj("status" -> "error", "message" -> "payment not found" ))
+    }
   }
+
 
 
 //  val userForm: Form[User] = Form(

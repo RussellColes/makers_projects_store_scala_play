@@ -74,9 +74,15 @@ class PaymentControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injec
 
     }
 
-//    "throw an error if incorrect payment structure is used" in {
-//
-//    }
+    "create a new payment using a route" in {
+      val paymentDAO = inject[PaymentDAO]
+      val paymentController = new PaymentController(stubControllerComponents(), paymentDAO)(inject[ExecutionContext])
+
+      val request = FakeRequest(POST, "/payment")
+        .withJsonBody(Json.obj(
+
+        ))
+    }
   }
   "PaymentController GET /payment" should {
 
@@ -97,8 +103,10 @@ class PaymentControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injec
 
       val jsonResponse = contentAsJson(result)
       (jsonResponse \ "status").as[String] mustBe "success"
-      (jsonResponse \ "message").as[String] must include("PLACEHOLDER")
-
+      (jsonResponse \ "message").as[String] must include("payment found")
+      println(jsonResponse \ "payment" \ "amount")
+      (jsonResponse \ "payment" \ "id").as[Long] mustBe (1)
+      (jsonResponse \ "payment" \ "amount").as[BigDecimal] mustBe (29.99)
 
 
     }
