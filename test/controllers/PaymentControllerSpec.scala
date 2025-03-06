@@ -1,7 +1,6 @@
 package controllers
 
-import daos.PaymentDAO
-import daos.DbDAO
+import daos.{DbDAO, PaymentDAO, UserDAO}
 import models.Users
 import org.scalatestplus.play._
 import org.scalatestplus.play.guice._
@@ -17,9 +16,9 @@ import slick.lifted
 import slick.lifted.TableQuery
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.play.PlaySpec
+
 import scala.concurrent.Await
 import scala.concurrent.duration._
-
 import scala.concurrent.ExecutionContext
 
 class PaymentControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injecting with BeforeAndAfterEach {
@@ -29,7 +28,18 @@ class PaymentControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injec
     val dbDAO = app.injector.instanceOf[DbDAO]
     // Clear all tables before each test
     Await.result(dbDAO.truncateAllTables(), 100.seconds)
+    val userDAO = inject[UserDAO]
+    val userController = new UserController(stubControllerComponents(), userDAO)(inject[ExecutionContext])
 
+    val request = FakeRequest(POST, "/signUp")
+      .withJsonBody(Json.obj(
+        "username" -> "testuser",
+        "email" -> "test@example.com",
+        "password" -> "password123!")
+      )
+      .withCSRFToken
+
+    Await.result(call(userController.signUp, request), 100.seconds)
     super.beforeEach()
   }
   "PaymentController POST /createPayment" should {
