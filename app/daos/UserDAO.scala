@@ -25,13 +25,7 @@ class UserDAO @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec: E
 
   def findUserByUsername(username: String): Future[Option[User]] = {
     val query = db.run(users.filter(_.username === username).result.headOption)
-    query.map { userOpt =>
-      println(s"Database result: $userOpt")  // Print the actual result
-      userOpt
-      }
-
-//    println(db.run(users.filter(_.username === username).result.headOption))
-//    db.run(users.filter(_.username === username).result.headOption)
+    query.map (userOpt => userOpt)
   }
 
   def clearUsers(): Future[Int] = {

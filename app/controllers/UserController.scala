@@ -35,13 +35,10 @@ class UserController @Inject()(cc: ControllerComponents, userDAO: UserDAO)(impli
 // CHECK USERNAME HELPER FUNCTIONS
   private def usernameIsFree (username: String): Future[Boolean] = {
     val findUserByUsername = userDAO.findUserByUsername(username)
-    findUserByUsername.map { maybeUser =>
-      println(s"found user: $maybeUser")
-      maybeUser match {
+    findUserByUsername.map {
         case Some(_) => false
         case None => true
       }
-    }
   }
 
   private def validateUsername(username: String): Future[Either[String, Unit]] =

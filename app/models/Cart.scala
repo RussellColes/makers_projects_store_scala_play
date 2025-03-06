@@ -3,7 +3,6 @@ package models
 import play.api.libs.json._
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.{ProvenShape, Tag}
-
 import java.sql.Timestamp
 import java.time.format.DateTimeFormatter
 

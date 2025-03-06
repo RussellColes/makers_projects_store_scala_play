@@ -1,6 +1,7 @@
 package controllers
 
 import daos.UserDAO
+import daos.ItemDAO
 import models.Users
 import org.scalatestplus.play._
 import org.scalatestplus.play.guice._
@@ -29,11 +30,13 @@ class HomeControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injectin
     val authenticatedRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest(GET, "/")
       .withSession("userId" -> "123", "username" -> "alan")
 
+    val itemDAO: ItemDAO = inject[ItemDAO]
+
 
   "HomeController GET" should {
 
     "render the index page from a new instance of controller" in {
-      val controller = new HomeController(stubControllerComponents())
+      val controller = new HomeController(stubControllerComponents(), itemDAO)(inject[ExecutionContext])
       val home = controller.index().apply(authenticatedRequest)
 
       status(home) mustBe OK

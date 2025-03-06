@@ -7,7 +7,12 @@ import slick.lifted.{ProvenShape, Tag}
 import java.sql.Timestamp
 import java.time.format.DateTimeFormatter
 
-case class Order(id: Option[Long], userId: Long, orderStatus: String, orderedAt: Option[Timestamp], totalAmount:Long)
+case class Order(
+                  id: Option[Long],
+                  userId: Long,
+                  orderStatus: String,
+                  orderedAt: Option[Timestamp],
+                  totalAmount:BigDecimal)
 
 object Order {
   implicit val timestampFormat: Format[java.sql.Timestamp] = new Format[java.sql.Timestamp] {
@@ -26,7 +31,7 @@ class Orders(tag: Tag) extends Table[Order](tag, "orders") {
   def userId: Rep[Long] = column[Long]("user_id")
   def orderStatus: Rep[String] = column[String]("order_status")
   def orderedAt: Rep[Timestamp] = column[Timestamp]("ordered_at")
-  def totalAmount: Rep[Long] = column[Long]("total_amount")
+  def totalAmount: Rep[BigDecimal] = column[BigDecimal]("total_amount")
 
   def user = foreignKey("fk_user_orders", userId, Users.table)(_.id, onDelete = ForeignKeyAction.Cascade)
 
