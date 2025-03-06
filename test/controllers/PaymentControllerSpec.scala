@@ -60,7 +60,7 @@ class PaymentControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injec
       val paymentDAO = inject[PaymentDAO]
       val paymentController = new PaymentController(stubControllerComponents(), paymentDAO)(inject[ExecutionContext])
       val result = paymentController.createPayment(
-        id = None,
+
         amount = 29.99,
         currency = "USD",
         status = "pending",
@@ -76,12 +76,23 @@ class PaymentControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injec
 
     "create a new payment using a route" in {
       val paymentDAO = inject[PaymentDAO]
-      val paymentController = new PaymentController(stubControllerComponents(), paymentDAO)(inject[ExecutionContext])
+      val paymentController = new PaymentController(
+        stubControllerComponents(), paymentDAO)(inject[ExecutionContext]
+      )
 
       val request = FakeRequest(POST, "/payment")
+        .withSession("userId" -> "1", "username" -> "testuser")
         .withJsonBody(Json.obj(
-
+          "amount" -> 29.99,
+          "currency" -> "USD",
+          "orderId" -> 1
         ))
+        .withCSRFToken
+      val result = call(paymentController.newPayment, request)
+      status(result) mustBe CREATED
+      val jsonResponse = contentAsJson(result)
+      (jsonResponse \ "status").as[String] mustBe "success"
+      (jsonResponse \ "message").as[String] must include("payment created")
     }
   }
   "PaymentController GET /payment" should {
@@ -90,7 +101,7 @@ class PaymentControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injec
       val paymentDAO = inject[PaymentDAO]
       val paymentController = new PaymentController(stubControllerComponents(), paymentDAO)(inject[ExecutionContext])
       Await.result(paymentController.createPayment(
-        id = None,
+
         amount = 29.99,
         currency = "USD",
         status = "pending",
