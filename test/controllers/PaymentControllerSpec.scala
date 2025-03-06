@@ -24,13 +24,13 @@ import scala.concurrent.ExecutionContext
 class PaymentControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injecting with BeforeAndAfterEach {
 
   override def beforeEach(): Unit = {
-    // Get your DAO from the injector
+    // Clear tables
     val dbDAO = app.injector.instanceOf[DbDAO]
-    // Clear all tables before each test
     Await.result(dbDAO.truncateAllTables(), 100.seconds)
+
+    //Add test user
     val userDAO = inject[UserDAO]
     val userController = new UserController(stubControllerComponents(), userDAO)(inject[ExecutionContext])
-
     val request = FakeRequest(POST, "/signUp")
       .withJsonBody(Json.obj(
         "username" -> "testuser",
@@ -38,7 +38,6 @@ class PaymentControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injec
         "password" -> "password123!")
       )
       .withCSRFToken
-
     Await.result(call(userController.signUp, request), 100.seconds)
     super.beforeEach()
   }
@@ -48,19 +47,50 @@ class PaymentControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injec
       val paymentDAO = inject[PaymentDAO]
       val paymentController = new PaymentController(stubControllerComponents(), paymentDAO)(inject[ExecutionContext])
       val result = paymentController.createPayment(
-        id = None,                                  // Auto-generated in DB
+        id = None,
         amount = 29.99,
         currency = "USD",
         status = "pending",
         userId = 1,
         orderId = 1,
       )
-//      val result = call(paymentController.createPayment, request)
-//
       status(result) mustBe CREATED
-      //      val jsonResponse = contentAsJson(result)
-      //      (jsonResponse \ "status").as[String] mustBe "success"
-      //      (jsonResponse \ "message").as[String] must include("User")
+      val jsonResponse = contentAsJson(result)
+      (jsonResponse \ "status").as[String] mustBe "success"
+      (jsonResponse \ "message").as[String] must include("payment created")
+
+    }
+
+//    "throw an error if incorrect payment structure is used" in {
+//
+//    }
+  }
+  "PaymentController GET /payment" should {
+
+    "find payment in database after it has been created" in {
+      val paymentDAO = inject[PaymentDAO]
+      val paymentController = new PaymentController(stubControllerComponents(), paymentDAO)(inject[ExecutionContext])
+      Await.result(paymentController.createPayment(
+        id = None,
+        amount = 29.99,
+        currency = "USD",
+        status = "pending",
+        userId = 1,
+        orderId = 1,
+      ), 10.seconds)
+
+      val result = paymentController.findPaymentById(1)
+      status(result) mustBe OK
+
+      val jsonResponse = contentAsJson(result)
+      (jsonResponse \ "status").as[String] mustBe "success"
+      (jsonResponse \ "message").as[String] must include("PLACEHOLDER")
+
+
+
+    }
+  }
+}
 
 //      val request = FakeRequest(POST, "/payment")
 //        .withJsonBody(Json.obj(
@@ -76,12 +106,10 @@ class PaymentControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injec
 
 
 
-      // Verify user is actually created in the database
+// Verify user is actually created in the database
 //      val maybeUser = await(userDAO.findUserByUsername("testuser"))
 //      maybeUser must not be empty
 //      maybeUser.get.email mustBe "test@example.com"
-    }
-
 //    "return bad request for taken username" in {
 //      val userDAO = inject[UserDAO]
 //      val userController = new UserController(stubControllerComponents(), userDAO)(inject[ExecutionContext])
@@ -179,5 +207,3 @@ class PaymentControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injec
 //      session(result).get("userId") mustBe Some("1")
 //    }
 //
-  }
-}

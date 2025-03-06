@@ -21,26 +21,25 @@ class PaymentController @Inject()(cc: ControllerComponents, paymentDAO: PaymentD
 
   def createPayment(id: Option[Long], amount: BigDecimal, currency: String, status: String, userId: Long, orderId: Long): Future[Result] = {
     val payment = Payment(
-      id = None,                                  // Auto-generated in DB
+      id = None, // Auto-generated in DB
       amount = amount,
       currency = currency,
       status = status,
       userId = userId,
       orderId = orderId,
-      createdAt = Timestamp.from(Instant.now()),  // ✅ Use current timestamp
-      completedAt = None                          // ✅ Default to None
+      createdAt = Timestamp.from(Instant.now()), // ✅ Use current timestamp
+      completedAt = None // ✅ Default to None
     )
-    paymentDAO.createPayment(payment).map{id =>
-      Created(Json.obj("status" -> "success", "message" -> s"payment created: $id"))}}
-//    }.recover {
-//      case _ => InternalServerError(Json.obj("status" -> "error", "message" -> "payment could not be created"))
-//    }
-//
-//  }
+    paymentDAO.createPayment(payment).map { id =>
+      Created(Json.obj("status" -> "success", "message" -> s"payment created: $id"))
+    }.recover {
+      case _ => InternalServerError(Json.obj("status" -> "error", "message" -> "payment could not be created"))
+    }
+  }
 
-
-
-
+  def findPaymentById(id: Long): Future[Result] = {
+    Future.successful(NotImplemented)
+  }
 
 
 //  val userForm: Form[User] = Form(
