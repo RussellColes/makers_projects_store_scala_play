@@ -69,16 +69,11 @@ class ItemControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injectin
       (jsonResponse \ "status").as[String] mustBe "success"
       (jsonResponse \ "message").as[String] must include("Item")
 
-      // Verify the item was created in the database
-      // You can do this by getting the ID from the response or by searching for the name
-      // If your response includes the item ID:
+
       val itemId = (jsonResponse \ "id").as[Long]
       val maybeItem = await(itemDAO.findItemById(itemId))
       maybeItem must not be empty
-//      below can be used for another test if we want to verify the details
-//      maybeItem.get.name mustBe "Test Item 1"
-//      maybeItem.get.price mustBe 10.99
-//      maybeItem.get.description mustBe "Description 1"
+
     }
   }
   "ItemControllerGet" should {
@@ -97,19 +92,89 @@ class ItemControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injectin
 
     "find an item by id when the item exists" in {
       // Call the method under test
-      val maybeItem = Await.result(itemDAO.findItemById(3), 5.seconds)
+      val allItems = Await.result(itemDAO.getAllItems(), 5.seconds)
+      val testItem = allItems.find(_.name == testItem3.name).getOrElse(
+        fail("Test item not found in database")
+      )
+      val itemId = testItem.id.getOrElse(fail("Item has no ID"))
+
+      val maybeItem = Await.result(itemDAO.findItemById(itemId), 5.seconds)
       println(f"testItem3 name ${testItem3.name} maybeItemName: ${maybeItem.get.name}")
-      // Verify the result
+
       maybeItem mustBe defined
       maybeItem.get.name mustBe testItem3.name
     }
 
     "return None when finding an item by id that doesn't exist" in {
-      // Call the method under test
+
       val maybeItem = Await.result(itemDAO.findItemById(99L), 5.seconds)
 
-      // Verify the result
       maybeItem mustBe None
+    }
+  }
+  "ItemController Post/DeleteItem" should {
+    "delete an existing item and return NoContent" in {
+
+      val beforeItems = Await.result(itemDAO.getAllItems(), 5.seconds)
+      val beforeCount = beforeItems.length
+      val itemToDelete = beforeItems.head
+      val itemId = itemToDelete.id.get
+
+
+      val request = FakeRequest(DELETE, s"/deleteItem/$itemId")
+        .withCSRFToken
+      val result = call(itemController.deleteItem(itemId), request)
+
+
+      status(result) mustBe NO_CONTENT
+
+
+      val afterItems = Await.result(itemDAO.getAllItems(), 5.seconds)
+      afterItems.length mustBe (beforeCount - 1)
+
+
+      val itemStillExists = Await.result(itemDAO.findItemById(itemId), 5.seconds)
+      itemStillExists must be(None)
+
+
+      afterItems.map(_.name) must not contain itemToDelete.name
+    }
+
+    "return NotFound when deleting a non-existent item" in {
+
+      val nonExistentId = 9999L
+
+      val request = FakeRequest(DELETE, s"/deleteItem/$nonExistentId")
+        .withCSRFToken
+      val result = call(itemController.deleteItem(nonExistentId), request)
+
+      status(result) mustBe NOT_FOUND
+      val jsonResponse = contentAsJson(result)
+      (jsonResponse \ "message").as[String] must include("not found")
+    }
+
+  }
+  "ItemController PUT /updateItem/:id" should {
+    "Update an existing item" in {
+      val itemToUpdate = Item(None,"Updated Item 3",15.99,"Updated item 1","Paris","France")
+      val maybeItem = Await.result(itemDAO.updateItem(3, itemToUpdate), 5.seconds)
+
+      val request = FakeRequest(PUT, s"/updateItem/3")
+        .withJsonBody(Json.toJson(itemToUpdate))
+        .withCSRFToken
+
+      val result = call(itemController.updateItem(3), request)
+
+      status(result) mustBe OK
+      val jsonResponse = contentAsJson(result)
+      (jsonResponse \ "message").as[String] must include("updated successfully")
+
+      val updatedItemFromDb = Await.result(itemDAO.findItemById(3), 5.seconds)
+      updatedItemFromDb must be(defined)
+      updatedItemFromDb.get.name must include("Updated")
+      updatedItemFromDb.get.price mustBe (15.99)
+      updatedItemFromDb.get.description must include("Updated")
+
     }
   }
 }
