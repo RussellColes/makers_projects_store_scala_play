@@ -72,6 +72,7 @@ package models
 import play.api.libs.json._
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.{ProvenShape, Tag}
+
 import java.sql.Timestamp
 import java.time.format.DateTimeFormatter
 
@@ -89,6 +90,15 @@ case class Payment(
 
 // Companion object for payment
 object Payment {
+  implicit val timestampFormat: Format[java.sql.Timestamp] = new Format[java.sql.Timestamp] {
+    def writes(ts: Timestamp): JsValue = {
+      // Convert to Instant and format as an ISO-8601 string
+      val formatted = DateTimeFormatter.ISO_INSTANT.format(ts.toInstant)
+      JsString(formatted)
+    }
+    def reads(json: JsValue): JsResult[java.sql.Timestamp] = json.validate[Long].map(new java.sql.Timestamp(_))
+  }
+
   implicit val paymentFormat: OFormat[Payment] = Json.format[Payment]
 
   implicit val timestampFormat: Format[java.sql.Timestamp] = new Format[java.sql.Timestamp] {
