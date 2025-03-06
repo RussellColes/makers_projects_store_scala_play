@@ -24,8 +24,15 @@ GET     /login                      controllers.UserController.showLogInForm()
 GET     /items/:id                  controllers.ItemController.findItemById(id: Long)
 GET     /items                      controllers.ItemController.getAllItems()
 
+
 # CSRF issuer for testing
 GET     /csrf                       controllers.CSRFController.csrfToken()
+
+POST    /items                      controllers.ItemController.createItem()
+DELETE  /items/:id                  controllers.ItemController.deleteItem(id: Long)
+PUT     /items/:id                  controllers.ItemController.updateItem(id: Long)
+
+
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

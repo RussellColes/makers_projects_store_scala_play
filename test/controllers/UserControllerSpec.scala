@@ -1,6 +1,7 @@
 package controllers
 
 import daos.UserDAO
+import daos.DbDAO
 import models.Users
 import org.scalatestplus.play._
 import org.scalatestplus.play.guice._
@@ -25,9 +26,10 @@ class UserControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injectin
 
   override def beforeEach(): Unit = {
     // Get your DAO from the injector
-    val userDAO = app.injector.instanceOf[UserDAO]
-    // Clear the table and wait for it to complete before each test
-    Await.result(userDAO.clearUsers(), 100.seconds)
+    val dbDAO = app.injector.instanceOf[DbDAO]
+    // Clear all tables before each test
+    Await.result(dbDAO.truncateAllTables(), 100.seconds)
+
     super.beforeEach()
   }
   "UserController POST /signUp" should {
