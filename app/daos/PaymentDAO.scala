@@ -1,6 +1,6 @@
 package daos
 
-import models.{Payment, Payments}
+import models.{Payment, Payments, Item}
 import org.mindrot.jbcrypt.BCrypt
 import play.api.db.slick.DatabaseConfigProvider
 import slick.jdbc.JdbcProfile
@@ -23,6 +23,11 @@ class PaymentDAO @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec
   }
 
   // Find payment by id
+  def findPaymentById(id: Long): Future[Option[Payment]] = {
+    val payment = db.run(payments.filter(_.id === id).result.headOption)
+//    payment.map {payment => println(payment)}
+    payment
+  }
   // Find payments by userId
   // Create payment
 //
