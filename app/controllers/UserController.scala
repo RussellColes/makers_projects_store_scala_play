@@ -122,4 +122,10 @@ class UserController @Inject()(cc: ControllerComponents, userDAO: UserDAO)(impli
         }
     }.getOrElse(Future.successful(BadRequest("Invalid login data")))
   }
+
+  def logOut = Action { implicit request =>
+    Redirect(routes.UserController.logIn())
+      .withNewSession
+      .flashing("success" -> "You've been logged out")
+  }
 }

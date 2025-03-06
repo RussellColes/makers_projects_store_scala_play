@@ -156,4 +156,51 @@ class UserControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injectin
     }
 
   }
+  "UserController GET /logOut" should {
+    "clear the user data from session and redirect to login page" in {
+      val userDAO = inject[UserDAO]
+      val userController = new UserController(stubControllerComponents(), userDAO)(inject[ExecutionContext])
+
+      // First create and login a user
+      val signUpRequest = FakeRequest(POST, "/signUp")
+        .withJsonBody(Json.obj(
+          "username" -> "logoutuser",
+          "email" -> "logout@example.com",
+          "password" -> "password123!")
+        )
+        .withCSRFToken
+
+      await(call(userController.signUp, signUpRequest))
+
+      val loginRequest = FakeRequest(POST, "/logIn")
+        .withJsonBody(Json.obj(
+          "username" -> "logoutuser",
+          "password" -> "password123!")
+        )
+        .withCSRFToken
+
+      val loginResult = call(userController.logIn, loginRequest)
+
+      val logoutRequest = FakeRequest(GET, "/logOut")
+        .withSession(
+          "username" -> "logoutuser",
+          "userId" -> "1"
+        )
+        .withCSRFToken
+
+      val result = call(userController.logOut, logoutRequest)
+
+      status(result) mustBe SEE_OTHER // SEE_OTHER = HTTP 303 status code
+      redirectLocation(result).get mustBe routes.UserController.logIn().url
+
+      // Verify user data is removed from session
+      session(result).data.contains("username") mustBe false
+      session(result).data.contains("userId") mustBe false
+
+      // Verify flash message
+      flash(result).get("success") mustBe Some("You've been logged out")
+    }
+  }
+
+
 }
