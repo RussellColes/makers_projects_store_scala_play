@@ -1,6 +1,7 @@
 package controllers
 
 import daos.ItemDAO
+import daos.DbDAO
 import models.{Item, Items}
 import org.scalatest.time.SpanSugar.convertIntToGrainOfTime
 import org.scalatestplus.play._
@@ -14,30 +15,32 @@ import play.api.Play.materializer
 
 import scala.concurrent.{Await, ExecutionContext, Future}
 
-
 class ItemControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injecting with BeforeAndAfterEach {
-
+  implicit val ec: ExecutionContext = inject[ExecutionContext]
   val itemDAO: ItemDAO = inject[ItemDAO]
+  val dbDAO: DbDAO = inject[DbDAO]
   val itemController = new ItemController(stubControllerComponents(), itemDAO)(inject[ExecutionContext])
 
   // These aren't necessary until we
-  val testItem1 = Item(None,"Test Item 1", 10.99, "Description 1", "London", "UK")
-  val testItem2 = Item(None, "Test Item 2", 20.50, "Description 2", "London", "UK")
-  val testItem3 = Item(None, "Test Item 3", 5.25,"Description 3", "London", "UK")
+  val testItem1: Item = Item(None,"Test Item 1", 10.99, "Description 1", "London", "UK")
+  val testItem2: Item = Item(None, "Test Item 2", 20.50, "Description 2", "London", "UK")
+  val testItem3: Item = Item(None, "Test Item 3", 5.25,"Description 3", "London", "UK")
+
+
 
   override def beforeEach(): Unit = {
-    // Clear the items table before each test and populate with test data
-//    val clearResult = Await.result(itemDAO.clearItems(), 5.seconds)
+//    Clear all tables before running tests
+    val clearTables = Await.result(dbDAO.truncateAllTables(), 10.seconds)
 
-    // Insert test items
-//    val insertResults = Await.result(
-//      Future.sequence(Seq(
-//        itemDAO.createItem(testItem1),
-//        itemDAO.createItem(testItem2),
-//        itemDAO.createItem(testItem3)
-//      )),
-//      5.seconds
-//    )
+//     Insert test items
+    val insertResults = Await.result(
+      Future.sequence(Seq(
+        itemDAO.createItem(testItem1),
+        itemDAO.createItem(testItem2),
+        itemDAO.createItem(testItem3)
+      )),
+      10.seconds
+    )
 
     super.beforeEach()
   }
@@ -59,7 +62,6 @@ class ItemControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injectin
 
       val result = call(itemController.createItem, request)
 
-
       status(result) mustBe CREATED
       val jsonResponse = contentAsJson(result)
 
@@ -79,33 +81,35 @@ class ItemControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injectin
 //      maybeItem.get.description mustBe "Description 1"
     }
   }
-//  "ItemControllerGet" should {
-//    "return all items when calling getAllItems" in {
-//      // Call the method under test
-//      val items = Await.result(itemDAO.getAllItems(), 5.seconds)
-//
-//      // Verify the results
-//      items.length mustBe 3
-//      items must contain(testItem1)
-//      items must contain(testItem2)
-//      items must contain(testItem3)
-//    }
-//
-//    "find an item by id when the item exists" in {
-//      // Call the method under test
-//      val maybeItem = Await.result(itemDAO.findItemById(2L), 5.seconds)
-//
-//      // Verify the result
-//      maybeItem mustBe defined
-//      maybeItem.get mustBe testItem2
-//    }
-//
-//    "return None when finding an item by id that doesn't exist" in {
-//      // Call the method under test
-//      val maybeItem = Await.result(itemDAO.findItemById(99L), 5.seconds)
-//
-//      // Verify the result
-//      maybeItem mustBe None
-//    }
-//  }
+  "ItemControllerGet" should {
+    "return all items when calling getAllItems" in {
+      // Call the method under test
+      val items = Await.result(itemDAO.getAllItems(), 5.seconds)
+
+      // Verify the results
+      items.length mustBe 3
+      items.map(_.name) must contain allOf(
+        testItem1.name,
+        testItem2.name,
+        testItem3.name
+      )
+    }
+
+    "find an item by id when the item exists" in {
+      // Call the method under test
+      val maybeItem = Await.result(itemDAO.findItemById(3), 5.seconds)
+      println(f"testItem3 name ${testItem3.name} maybeItemName: ${maybeItem.get.name}")
+      // Verify the result
+      maybeItem mustBe defined
+      maybeItem.get.name mustBe testItem3.name
+    }
+
+    "return None when finding an item by id that doesn't exist" in {
+      // Call the method under test
+      val maybeItem = Await.result(itemDAO.findItemById(99L), 5.seconds)
+
+      // Verify the result
+      maybeItem mustBe None
+    }
+  }
 }
