@@ -20,8 +20,8 @@ class ItemController @Inject()(cc: ControllerComponents, itemDAO: ItemDAO)(impli
     implicit  request: Request[AnyContent] =>
       itemDAO.getAllItems().map {items =>
         println(items)
-//        Ok(Json.toJson(items))
-        Ok(views.html.items(items))
+        Ok(Json.toJson(items))
+//        Ok(views.html.items(items))
       }
   }
 
