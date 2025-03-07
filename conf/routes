@@ -35,6 +35,8 @@ PUT     /items/:id                  controllers.ItemController.updateItem(id: Lo
 
 # Routes for Payment
 POST    /payments                   controllers.PaymentController.newPayment
+GET     /payments/:id               controllers.PaymentController.getPayment(id: Long)
+
 
 
 # Map static resources from the /public folder to the /assets URL path
