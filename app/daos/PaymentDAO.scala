@@ -28,6 +28,18 @@ class PaymentDAO @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec
 //    payment.map {payment => println(payment)}
     payment
   }
+
+  // Update payment status to completed
+//  def updatePaymentStatus(id: Long): Future[Option[Payment]] = {
+  def updatePaymentStatus(id: Long): Future[Int] = {
+    val query = Payments.table.filter(_.id === id)
+      .map(_.status)
+      .update("completed")
+
+    db.run(query)
+  }
+
+
   // Find payments by userId
   // Create payment
 //
