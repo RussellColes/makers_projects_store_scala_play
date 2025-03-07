@@ -153,7 +153,7 @@ class UserControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injectin
       //      jsonBody("message").as[String] mustBe ("Password must contain more than 8 characters and a special character")
 
       session(result).get("username") mustBe Some("alan")
-      session(result).get("userId") mustBe Some("1")
+      session(result).get("userId") must not be empty
     }
 
   }

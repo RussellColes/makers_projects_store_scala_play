@@ -57,6 +57,13 @@ class ItemDAO @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec: E
     )
   }
 
+  def countItems(): Future[Int] = {
+    db.run(items.length.result)
+  }
+
+  def clearItems(): Future[Int] = {
+    db.run(sqlu"TRUNCATE TABLE items RESTART IDENTITY CASCADE")
+  }
 
 
   private class Items(tag: Tag) extends Table[Item](tag, "items") {
@@ -67,12 +74,11 @@ class ItemDAO @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec: E
     def location = column[String]("location")
     def country = column[String]("country")
 
-
-//    The * projection of the table used as default for queries and inserts.
-//    Should include all columns as a tuple, HList or custom shape and optionally map them to a custom entity type using the <> operator.
-//    The ProvenShape return type ensures that there is a Shape available for translating between the Column-based type in *
-//    and the client-side type without Column in the table's type parameter.
     def * = (id.?, name, price, description, location, country) <> ((Item.apply _).tupled, Item.unapply)
+    //    The * projection of the table used as default for queries and inserts.
+    //    Should include all columns as a tuple, HList or custom shape and optionally map them to a custom entity type using the <> operator.
+    //    The ProvenShape return type ensures that there is a Shape available for translating between the Column-based type in *
+    //    and the client-side type without Column in the table's type parameter.
   }
 }
 
