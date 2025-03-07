@@ -60,7 +60,7 @@ class PaymentControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injec
       val paymentDAO = inject[PaymentDAO]
       val paymentController = new PaymentController(stubControllerComponents(), paymentDAO)(inject[ExecutionContext])
       val result = paymentController.createPayment(
-        id = None,
+
         amount = 29.99,
         currency = "USD",
         status = "pending",
@@ -74,9 +74,26 @@ class PaymentControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injec
 
     }
 
-//    "throw an error if incorrect payment structure is used" in {
-//
-//    }
+    "create a new payment using a route" in {
+      val paymentDAO = inject[PaymentDAO]
+      val paymentController = new PaymentController(
+        stubControllerComponents(), paymentDAO)(inject[ExecutionContext]
+      )
+
+      val request = FakeRequest(POST, "/payment")
+        .withSession("userId" -> "1", "username" -> "testuser")
+        .withJsonBody(Json.obj(
+          "amount" -> 29.99,
+          "currency" -> "USD",
+          "orderId" -> 1
+        ))
+        .withCSRFToken
+      val result = call(paymentController.newPayment, request)
+      status(result) mustBe CREATED
+      val jsonResponse = contentAsJson(result)
+      (jsonResponse \ "status").as[String] mustBe "success"
+      (jsonResponse \ "message").as[String] must include("payment created")
+    }
   }
   "PaymentController GET /payment" should {
 
@@ -84,7 +101,7 @@ class PaymentControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injec
       val paymentDAO = inject[PaymentDAO]
       val paymentController = new PaymentController(stubControllerComponents(), paymentDAO)(inject[ExecutionContext])
       Await.result(paymentController.createPayment(
-        id = None,
+
         amount = 29.99,
         currency = "USD",
         status = "pending",
@@ -97,8 +114,10 @@ class PaymentControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injec
 
       val jsonResponse = contentAsJson(result)
       (jsonResponse \ "status").as[String] mustBe "success"
-      (jsonResponse \ "message").as[String] must include("PLACEHOLDER")
-
+      (jsonResponse \ "message").as[String] must include("payment found")
+      println(jsonResponse \ "payment" \ "amount")
+      (jsonResponse \ "payment" \ "id").as[Long] mustBe (1)
+      (jsonResponse \ "payment" \ "amount").as[BigDecimal] mustBe (29.99)
 
 
     }
