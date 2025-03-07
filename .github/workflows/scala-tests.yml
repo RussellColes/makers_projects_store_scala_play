@@ -45,6 +45,18 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y sbt
 
+      - name: Create test.conf
+        run: |
+          cat > conf/test.conf << EOF
+          include "application.conf"
+          
+          slick.dbs.default.profile = "slick.jdbc.PostgresProfile$"
+          slick.dbs.default.db.driver = "org.postgresql.Driver"
+          slick.dbs.default.db.url = "jdbc:postgresql://localhost:5432/test"
+          slick.dbs.default.db.user = "postgres"
+          slick.dbs.default.db.password = "postgres"
+          EOF
+
       - name: Run tests
         run: sbt test
         env:
