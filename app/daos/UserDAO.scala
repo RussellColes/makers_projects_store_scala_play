@@ -29,7 +29,11 @@ class UserDAO @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec: E
   }
 
   def clearUsers(): Future[Int] = {
-    db.run(sqlu"TRUNCATE TABLE users RESTART IDENTITY")
+    db.run(sqlu"TRUNCATE TABLE users RESTART IDENTITY CASCADE")
+  }
+
+  def countUsers(): Future[Int] = {
+    db.run(users.length.result)
   }
 
   private class Users(tag: Tag) extends Table[User](tag, "users") {
