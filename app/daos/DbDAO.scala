@@ -13,7 +13,7 @@ class DbDAO @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec: Exe
   import profile.api._
 
   def truncateAllTables(): Future[Int] = {
-    val truncateQuery = sqlu"TRUNCATE TABLE cart_items, items, carts, users RESTART IDENTITY CASCADE"
+    val truncateQuery = sqlu"TRUNCATE TABLE payments, cart_items, items, carts, users RESTART IDENTITY CASCADE"
     db.run(truncateQuery)
   }
 

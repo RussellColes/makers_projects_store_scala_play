@@ -1,7 +1,8 @@
 package controllers
 
 import daos.{DbDAO, OrderDAO, PaymentDAO, UserDAO}
-import models.{Order, User}
+import models.{Order, User, Payment}
+import org.apache.pekko.stream.Materializer
 import org.scalatestplus.play._
 import org.scalatestplus.play.guice._
 import play.api.Play.materializer
@@ -19,9 +20,11 @@ import org.scalatestplus.play.PlaySpec
 
 import java.sql.Timestamp
 import java.time.Instant
-import scala.concurrent.Await
+import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext
+import scala.concurrent.ExecutionContext.Implicits.global
+
+
 
 class PaymentControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injecting with BeforeAndAfterEach {
 
@@ -95,12 +98,16 @@ class PaymentControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injec
       (jsonResponse \ "message").as[String] must include("payment created")
     }
   }
-  "PaymentController GET /payment" should {
+  "PaymentController GET /payment/:id" should {
 
     "find payment in database after it has been created" in {
+      implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.global // ✅ Ensure ExecutionContext is available
+      implicit val mat: Materializer = app.materializer // ✅ Ensure Materializer is available for consumeData
       val paymentDAO = inject[PaymentDAO]
       val paymentController = new PaymentController(stubControllerComponents(), paymentDAO)(inject[ExecutionContext])
-      Await.result(paymentController.createPayment(
+
+      // 1. Create a payment
+      val createPaymentResult = Await.result(paymentController.createPayment(
 
         amount = 29.99,
         currency = "USD",
@@ -109,17 +116,105 @@ class PaymentControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injec
         orderId = 1,
       ), 10.seconds)
 
-      val result = paymentController.findPaymentById(1)
-      status(result) mustBe OK
+      // 2. Extract JSON manually from response body
+      val jsonStringFuture: Future[String] = createPaymentResult.body.consumeData(mat).map(_.utf8String)(ec)
+      val jsonString: String = Await.result(jsonStringFuture, 10.seconds)
+      val jsonResponseCreatePayment = Json.parse(jsonString)
 
-      val jsonResponse = contentAsJson(result)
-      (jsonResponse \ "status").as[String] mustBe "success"
-      (jsonResponse \ "message").as[String] must include("payment found")
-      println(jsonResponse \ "payment" \ "amount")
-      (jsonResponse \ "payment" \ "id").as[Long] mustBe (1)
-      (jsonResponse \ "payment" \ "amount").as[BigDecimal] mustBe (29.99)
+      // 3. Extract the ID from the "id" field
+      val insertedId = (jsonResponseCreatePayment \ "id").as[Long]
 
+//      println(s"Test - this is the return from createPayment: $createPaymentResult")
+//      println(s"Test - this is the jsonResponse ID from createPayment: $insertedId")
 
+      // 4. Retrieve the payment using the extracted id
+      val resultFindPayment = Await.result(paymentController.findPaymentById(insertedId), 10.seconds)
+
+      // 5. Extract JSON manually from response body
+      val findPaymentJsonStringFuture: Future[String] = resultFindPayment.body.consumeData(mat).map(_.utf8String)(ec)
+      val findPaymentJsonString: String = Await.result(findPaymentJsonStringFuture, 10.seconds)
+      val jsonResponseFindPayment = Json.parse(findPaymentJsonString)
+
+      (jsonResponseFindPayment \ "status").as[String] mustBe "success"
+      (jsonResponseFindPayment \ "message").as[String] must include("payment found")
+      println(jsonResponseFindPayment \ "payment" \ "amount")
+      (jsonResponseFindPayment \ "payment" \ "id").as[Long] mustBe (1)
+      (jsonResponseFindPayment \ "payment" \ "amount").as[BigDecimal] mustBe (29.99)
+
+    }
+  }
+//  "PaymentController PATCH /payment/:id" should {
+//    "update the payment status from pending to completed" in {
+//      val paymentDAO = inject[PaymentDAO]
+//      val paymentController = new PaymentController(stubControllerComponents(), paymentDAO)(inject[ExecutionContext])
+//
+//      // Create payment
+//      val paymentId = Await.result(paymentDAO.createPayment(
+//        Payment(None, 29.99, "USD", "pending", 1, 1, Timestamp.from(Instant.now()), None)
+//      ), 10.seconds)
+//
+//      // Call update
+//      val updateResult = Await.result(paymentController.updatePaymentStatus(paymentId).apply(FakeRequest(PATCH, s"/payments/$paymentId/status")), 10.seconds)
+////
+      // THIS IS CHAT GPT'S FAILED ATTEMPT AT WRITING A TEST:
+//      // Check Response
+//      status(updateResult) mustBe Ok
+//      val jsonResponse = contentAsJson(updateResult)
+//      (jsonResponse \ "message").as[String] mustBe s"Payment with ID $paymentId updated to 'completed'"
+//      // ✅ Step 4: Verify the payment status was updated in the database
+//      val updatedPayment = Await.result(paymentDAO.findPaymentById(paymentId), 10.seconds)
+//      updatedPayment mustBe defined
+//      updatedPayment.get.status mustBe "completed"
+//    }
+//
+//    "return 404 Not Found if payment does not exist" in {
+//      val paymentDAO = inject[PaymentDAO]
+//      val paymentController = new PaymentController(stubControllerComponents(), paymentDAO)(inject[ExecutionContext])
+//
+//      val nonExistentId = 9999L
+//      val result = Await.result(paymentController.updatePaymentStatus(nonExistentId).apply(FakeRequest(PATCH, s"/payments/$nonExistentId/status")), 10.seconds)
+//
+//      status(result) mustBe NOT_FOUND
+//      val jsonResponse = contentAsJson(result)
+//      (jsonResponse \ "message").as[String] mustBe s"Payment with ID $nonExistentId not found"
+//    }
+//
+    //THIS IS RUSSELL'S FAILED ATTEMPT AT WRITING THE TEST
+//      implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.global // ✅ Ensure ExecutionContext is available
+//      implicit val mat: Materializer = app.materializer // ✅ Ensure Materializer is available for consumeData
+//      val paymentDAO = inject[PaymentDAO]
+//      val paymentController = new PaymentController(stubControllerComponents(), paymentDAO)(inject[ExecutionContext])
+//
+//      // 1. Create a payment
+//      val createPaymentResult = Await.result(paymentController.createPayment(
+//
+//        amount = 29.99,
+//        currency = "USD",
+//        status = "pending",
+//        userId = 1,
+//        orderId = 1,
+//      ), 10.seconds)
+//
+//      // 2. Extract JSON manually from response body
+//      val jsonStringFuture: Future[String] = createPaymentResult.body.consumeData(mat).map(_.utf8String)(ec)
+//      val jsonString: String = Await.result(jsonStringFuture, 10.seconds)
+//      val jsonResponseCreatePayment = Json.parse(jsonString)
+//
+//      // 3. Extract the ID from the "id" field
+//      val insertedId = (jsonResponseCreatePayment \ "id").as[Long]
+//
+//      // 4. Call the updatePaymentStatus method
+//      val updatePaymentStatusResult = paymentController.updatePaymentStatus(insertedId)
+//      println(s"This is the update Payment Status Result: $updatePaymentStatusResult")
+//      status()
+
+//      val updatePaymentStatusJsonStringFuture: Future[String] = updatePaymentStatusResult.body.consumeData(mat).map(_.utf8String)(ec)
+//      val updatePaymentStatusJsonString: String = Await.result(updatePaymentStatusJsonStringFuture, 10.seconds)
+//      val UpdatePaymentStatusJsonResponseCreatePayment = Json.parse(updatePaymentStatusJsonString)
+//
+//      (updatePaymentStatusJsonString \ "status").as[String] mustBe "success"
+//      (updatePaymentStatusJsonString \ "message").as[String] must include("payment completed")
+//      (updatePaymentStatusJsonString \ "payment" \ "status") mustBe "completed"
     }
   }
 }

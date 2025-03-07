@@ -31,7 +31,8 @@ class PaymentController @Inject()(cc: ControllerComponents, paymentDAO: PaymentD
       completedAt = None // ✅ Default to None
     )
     paymentDAO.createPayment(payment).map { id =>
-      Created(Json.obj("status" -> "success", "message" -> s"payment created: $id"))
+      println(s"Payment Controller Id received: $id")
+      Created(Json.obj("status" -> "success", "message" -> s"payment created: $id", "id" -> Json.toJson(id)))
     }.recover {
       case _ => InternalServerError(Json.obj("status" -> "error", "message" -> "payment could not be created"))
     }
@@ -59,6 +60,33 @@ class PaymentController @Inject()(cc: ControllerComponents, paymentDAO: PaymentD
     }
   }
 
+  def updatePaymentStatus(id: Long): Action[AnyContent] = Action.async {
+    paymentDAO.updatePaymentStatus(id).map {
+      case 0 => NotFound(Json.obj("message" -> s"Payment with ID $id not found"))
+      case _ => Ok(Json.obj("message" -> s"Payment with ID $id updated to 'completed'"))
+    }.recover {
+      case _ => InternalServerError(Json.obj("message" -> "An error occurred while updating payment status"))
+    }
+  }
+
+//  def updatePaymentStatus1(id: Long): Future[Result] = Action.async(parse.json) {
+//    implicit request => request.body.validate[Payment].fold(
+//      errors => Future.successful(BadRequest(Json.obj("message" -> "Invalid JSON"))),
+//      updatedPayment => {
+//        paymentDAO.findPaymentById(id).flatMap {
+//          case Some(-) =>
+//            paymentDAO.updatePaymentStatus(id, updatedPayment).map { rowsUpdated =>
+//              if (rowsUpdated > 0) Ok(Json.obj("message" -> "Payment updated successfully"))
+//              else InternalServerError(Json.obj("message" -> "Failed to update payment"))
+//            }
+//          case None =>
+//            Future.successful(NotFound(Json.obj("message" -> s"Payment with id $id not found")))
+//        }
+//      }
+//    )
+//
+//    Future.successful(Results.NotImplemented("This method is not yet implemented."))
+//  }
 
 }
 
