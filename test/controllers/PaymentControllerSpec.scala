@@ -215,8 +215,8 @@ class PaymentControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injec
 //      (updatePaymentStatusJsonString \ "status").as[String] mustBe "success"
 //      (updatePaymentStatusJsonString \ "message").as[String] must include("payment completed")
 //      (updatePaymentStatusJsonString \ "payment" \ "status") mustBe "completed"
-    }
-  }
+
+
 }
 
 //      val request = FakeRequest(POST, "/payment")
