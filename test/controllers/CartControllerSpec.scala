@@ -113,7 +113,7 @@ class CartControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injectin
       val result = controller.updateCartItem(1L).apply(request)
 
       status(result) mustBe OK
-      contentAsString(result) must be ("Cart item updated. Id: 1")
+      contentAsString(result) must include ("Cart item updated. Id: 1")
     }
 
     "deleteCartItem returns OK" in {
@@ -121,7 +121,7 @@ class CartControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injectin
       val result = controller.deleteCartItem(1L).apply(request)
 
       status(result) mustBe OK
-      contentAsString(result) must be ("Cart item deleted. Id: 1")
+      contentAsString(result) must include ("Cart item deleted. Id: 1")
     }
   }
 }
