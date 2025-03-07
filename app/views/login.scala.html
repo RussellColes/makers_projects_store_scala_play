@@ -2,54 +2,69 @@
 
 @import helper._
 
-@main("Login") {
-<h1>Login</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/main.css")">
+    <link rel="shortcut icon" type="image/png" href="@routes.Assets.versioned("images/favicon.png")">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@@5.0.2/dist/css/bootstrap.min.css">
+</head>
+<body>
 
-@if(message.nonEmpty) {
-<div>@message</div>
-}
-
-<form id="login-form" method="post">
-    @CSRF.formField
-    <div>
-        <label for="username">Username</label>
-        <input type="text" id="username" name="username">
+<div class="d-flex justify-content-center align-items-center vh-100">
+    <div class="card" style="width: 20rem;">
+        <div class="card-body">
+            <h1 class="card-title" style="text-align:center;">Login</h1>
+            @if(message.nonEmpty) {
+            <div class="alert alert-danger">@message</div>
+            }
+            <form id="login-form" method="post">
+                @CSRF.formField
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" id="username" name="username" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" id="password" name="password" class="form-control">
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Login</button>
+            </form>
+            <a href="/signup"><p class="text-sm-start" style="text-align:center;">Don't have an account, please sign up</p></a>
+        </div>
     </div>
-    <div>
-        <label for="password">Password</label>
-        <input type="password" id="password" name="password">
-    </div>
-    <button type="submit">Login</button>
-</form>
+</div>
 
 <script type="text/javascript">
-
     document.getElementById('login-form').addEventListener('submit', function(event) {
-        event.preventDefault(); // Prevent the default form submission
+      event.preventDefault(); // Prevent the default form submission
 
-        const formData = new FormData(event.target);
-        const data = Object.fromEntries(formData.entries());
+      const formData = new FormData(event.target);
+      const data = Object.fromEntries(formData.entries());
 
-        fetch('@routes.UserController.logIn().absoluteURL()', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Csrf-Token': formData.get('csrfToken')
-            },
-            body: JSON.stringify(data)
+      fetch('@routes.UserController.logIn().absoluteURL()', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Csrf-Token': formData.get('csrfToken')
+          },
+          body: JSON.stringify(data)
         })
         .then(response => response.json())
         .then(data => {
-            if (data.status === 'success') {
-                console.log("Redirect reached")
-                window.location.href = '/'; // Redirect on success
-            } else {
-                alert('Error: ' + data.message);
-            }
+          if (data.status === 'success') {
+            console.log("Redirect reached")
+            window.location.href = '/'; // Redirect on success
+          } else {
+            alert('Error: ' + data.message);
+          }
         })
         .catch(error => {
-            console.error('Error:', error);
+          console.error('Error:', error);
         });
     });
 </script>
-}
+</body>
+</html>

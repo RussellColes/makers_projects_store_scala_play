@@ -28,8 +28,8 @@ class CartItemDAO @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit e
     db.run(findByIdQuery)
   }
 
-  def findByCartId(cartId: Long): Future[Option[CartItem]] = {
-    val findByUserIdQuery = CartItems.table.filter(_.cartId === cartId).result.headOption
+  def findByCartId(cartId: Long): Future[Seq[CartItem]] = {
+    val findByUserIdQuery = CartItems.table.filter(_.cartId === cartId).result
     db.run(findByUserIdQuery)
   }
 

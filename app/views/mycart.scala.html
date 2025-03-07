@@ -1,5 +1,7 @@
 @(cartItems: Seq[models.CartItemView])(implicit request: RequestHeader)
 
+@import helper._
+
 @main("mycart") {
 <div class="container mt-4">
   <h1>Your Shopping Cart</h1>
@@ -18,6 +20,7 @@
       <td>@item.productName</td>
       <td>
         <form action="@routes.CartController.updateCartItem(item.id)" method="post" class="form-inline">
+          @CSRF.formField
           <div class="container">
             <div class="d-flex align-items-center">
               <input type="number" name="quantity" value="@item.quantity" min="1" class="form-control me-2" style="width: 80px;">
@@ -29,6 +32,7 @@
       <td>$@item.price</td>
       <td>
         <form action="@routes.CartController.deleteCartItem(item.id)" method="post" style="display:inline;">
+          @CSRF.formField
           <button type="submit" class="btn btn-danger btn-sm">Delete</button>
         </form>
       </td>
@@ -38,8 +42,11 @@
   </table>
 
   <div class="mt-4">
-    <a href="" class="btn btn-secondary">Back to Shopping</a>
-    <a href="" class="btn btn-success">Checkout</a>
+    <a href="/" class="btn btn-secondary">Back to Shopping</a>
+    <form action="@routes.CartController.cartCheckOut()" method="post" style="display:inline;">
+      @CSRF.formField
+      <button type="submit" class="btn btn-success">Checkout</button>
+    </form>
   </div>
 </div>
 }
