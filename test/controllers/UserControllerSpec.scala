@@ -32,6 +32,7 @@ class UserControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injectin
 
     super.beforeEach()
   }
+
   "UserController POST /signUp" should {
 
     "create a new user" in {
@@ -149,7 +150,7 @@ class UserControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injectin
       val result = call(userController.logIn, requestLogin)
       status(result) mustBe OK
       val jsonBody = contentAsJson(result)
-//      jsonBody("message").as[String] mustBe ("Password must contain more than 8 characters and a special character")
+      //      jsonBody("message").as[String] mustBe ("Password must contain more than 8 characters and a special character")
 
       session(result).get("username") mustBe Some("alan")
       session(result).get("userId") must not be empty
@@ -200,6 +201,26 @@ class UserControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injectin
       // Verify flash message
       flash(result).get("success") mustBe Some("You've been logged out")
     }
+  }
+
+  "UserController GET /logIn" should {
+
+  }
+  "redirect to home if user is already logged in" in {
+    val request = FakeRequest(GET, "/login").withSession("userId" -> "123") // Simulate logged-in user
+    val result = route(app, request).get
+
+    status(result) mustBe SEE_OTHER // 303 Redirect
+    redirectLocation(result) mustBe Some(routes.HomeController.index().url) // Redirects to "/"
+  }
+
+  "show the login page if user is not logged in" in {
+    val request = FakeRequest(GET, "/login") // No session, user not logged in
+    val result = route(app, request).get
+
+    status(result) mustBe OK // 200 OK
+    contentType(result) mustBe Some("text/html") // Ensure HTML content
+    contentAsString(result) must include("<form") // Simple check for login form
   }
 
 
