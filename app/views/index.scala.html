@@ -1,5 +1,7 @@
 @(items: Seq[Item])(implicit request: RequestHeader)
 
+@import helper._
+
 @main("The Makers Store") {
 <style>
   .items-container {
@@ -51,7 +53,10 @@
     <div class="item-title">@item.name</div>
     <div class="item-price">£@item.price</div>
     <div class="item-description">@item.description</div>
-    <button>Add to Cart</button>
+      <form action="@routes.CartController.addItemToCart(item.id.get)" method="post" class="form-inline">
+      @CSRF.formField
+      <button class="btn btn-primary">Add to Cart</button>
+      </form>
   </div>
   }
 </div>
