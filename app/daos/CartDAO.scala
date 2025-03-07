@@ -1,6 +1,6 @@
 package daos
 
-import models.{Cart, Carts, Orders}
+import models.{Cart, Carts}
 import play.api.db.slick.DatabaseConfigProvider
 import slick.jdbc.JdbcProfile
 
@@ -30,8 +30,18 @@ class CartDAO @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec: E
 
   // Find cart by userId
   def findByUserId(userId: Long): Future[Seq[Cart]] = {
-    val findByUserIdQuery = Carts.table.filter(_.userId === userId).result
+    val findByUserIdQuery = Carts.table
+      .filter(_.userId === userId)
+      .result
     db.run(findByUserIdQuery)
+  }
+
+  def findActiveCart(userId: Long): Future[Option[Cart]] = {
+    val findActiveCartQuery = Carts.table
+      .filter(cart => cart.userId === userId && cart.cartStatus === "active")
+      .result
+      .headOption
+    db.run(findActiveCartQuery)
   }
 
   // Update cart

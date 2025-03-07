@@ -11,11 +11,11 @@ POST    /login                      controllers.UserController.logIn()
 
 # Routs for cart
 GET     /mycart                     controllers.CartController.myCart()
-GET     /carts/:id                  controllers.CartController.getCartById(id: Long)
 GET     /carts/users/:userId        controllers.CartController.getCartByUserId(userId: Long)
-POST    /carts                      controllers.CartController.createCart()
+POST    /carts/items/:itemId        controllers.CartController.addItemToCart(itemId: Long)
 POST    /carts/items/:id/update     controllers.CartController.updateCartItem(id: Long)
 POST    /carts/items/:id/delete     controllers.CartController.deleteCartItem(id: Long)
+POST    /carts/checkout             controllers.CartController.cartCheckOut()
 
 GET     /login                      controllers.UserController.showLogInForm()
 

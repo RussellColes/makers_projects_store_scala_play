@@ -8,7 +8,7 @@ import java.time.format.DateTimeFormatter
 
 
 // Cart case class
-case class Cart(id: Option[Long], userId: Option[Long], createdAt: Option[Timestamp], updatedAt: Option[Timestamp])
+case class Cart(id: Option[Long], userId: Option[Long], cartStatus: String, createdAt: Option[Timestamp], updatedAt: Option[Timestamp])
 
 object Cart {
   implicit val timestampFormat: Format[java.sql.Timestamp] = new Format[java.sql.Timestamp] {
@@ -25,13 +25,14 @@ object Cart {
 class Carts(tag: Tag) extends Table[Cart](tag, "carts") {
   def id: Rep[Long] = column[Long]("id", O.PrimaryKey, O.AutoInc)
   def userId: Rep[Long] = column[Long]("user_id")
+  def cartStatus: Rep[String] = column[String]("cart_status")
   def createdAt: Rep[Timestamp] = column[Timestamp]("created_at")
   def updatedAt: Rep[Timestamp] = column[Timestamp]("updated_at")
 
   def user = foreignKey("fk_user", userId, Users.table)(_.id, onDelete = ForeignKeyAction.Cascade)
 
   override def * : ProvenShape[Cart] =
-    (id.?, userId.?, createdAt.?, updatedAt.?) <> ((Cart.apply _).tupled, Cart.unapply)
+    (id.?, userId.?, cartStatus, createdAt.?, updatedAt.?) <> ((Cart.apply _).tupled, Cart.unapply)
 }
 
 object Carts {
