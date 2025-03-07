@@ -95,8 +95,8 @@ class CartControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injectin
       val activeCart = Cart(Some(1), Some(userId), "active", Some(now), Some(now))
       when(mockCartDAO.findActiveCart(userId)).thenReturn(Future.successful(Some(activeCart)))
       val cartItemViews = Seq(
-        CartItemView(1, "Product A", 1, 10.0),
-        CartItemView(2, "Product B", 2, 20.0)
+        CartItemView(1, Some(1L), "Product A", 1, 10.0),
+        CartItemView(2, Some(1L),"Product B", 2, 20.0)
       )
       when(mockCartItemViewDAO.findCartItemViews(1)).thenReturn(Future.successful(cartItemViews))
 
@@ -108,20 +108,27 @@ class CartControllerSpec extends PlaySpec with GuiceOneAppPerSuite with Injectin
       contentAsString(result) must include ("Product B")
     }
 
-    "updateCartItem returns OK" in {
-      val request = FakeRequest(POST, "/cart/update/1")
-      val result = controller.updateCartItem(1L).apply(request)
+    "updateCartItem updates quantity and redirects to myCart" in {
+      val existingCartItem = CartItem(Some(1L),Some(1L),Some(1L),10)
+      when(mockCartItemDAO.findById(1L)).thenReturn(Future.successful(Some(existingCartItem)))
+      when(mockCartItemDAO.updateCartItem(any[CartItem])).thenReturn(Future.successful(1))
+      val request = FakeRequest(POST, "/cart/items/update")
+        .withFormUrlEncodedBody("id" -> "1", "quantity" -> "20")
+        .withCSRFToken
+      val result = controller.updateCartItem().apply(request)
 
-      status(result) mustBe OK
-      contentAsString(result) must include ("Cart item updated. Id: 1")
+      status(result) mustBe SEE_OTHER
+      redirectLocation(result) mustBe Some(routes.CartController.myCart().url)
     }
 
-    "deleteCartItem returns OK" in {
-      val request = FakeRequest(POST, "/cart/delete/1")
-      val result = controller.deleteCartItem(1L).apply(request)
-
-      status(result) mustBe OK
-      contentAsString(result) must include ("Cart item deleted. Id: 1")
+    "deleteCartItem deletes the item and redirect to myCart when valid form data is provided" in {
+      when(mockCartItemDAO.deleteCartItem(1L)).thenReturn(Future.successful(1))
+      val request = FakeRequest(POST, "/carts/items/delete")
+        .withFormUrlEncodedBody("id" -> "1")
+        .withCSRFToken
+      val result = controller.deleteCartItem().apply(request)
+      status(result) mustBe SEE_OTHER
+      redirectLocation(result) mustBe Some(routes.CartController.myCart().url)
     }
   }
 }

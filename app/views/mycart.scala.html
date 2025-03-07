@@ -19,10 +19,12 @@
     <tr>
       <td>@item.productName</td>
       <td>
-        <form action="@routes.CartController.updateCartItem(item.id)" method="post" class="form-inline">
+        <form action="@routes.CartController.updateCartItem()" method="post" class="form-inline">
           @CSRF.formField
           <div class="container">
             <div class="d-flex align-items-center">
+              <input type="hidden" name="id" value="@item.id">
+              <input type="hidden" name="cartId" value="@item.cartId">
               <input type="number" name="quantity" value="@item.quantity" min="1" class="form-control me-2" style="width: 80px;">
               <button type="submit" class="btn btn-primary btn-sm">Update</button>
             </div>
@@ -31,8 +33,10 @@
       </td>
       <td>$@item.price</td>
       <td>
-        <form action="@routes.CartController.deleteCartItem(item.id)" method="post" style="display:inline;">
+        <form action="@routes.CartController.deleteCartItem()" method="post" style="display:inline;">
           @CSRF.formField
+          <input type="hidden" name="id" value="@item.id">
+          <input type="hidden" name="cartId" value="@item.cartId">
           <button type="submit" class="btn btn-danger btn-sm">Delete</button>
         </form>
       </td>
