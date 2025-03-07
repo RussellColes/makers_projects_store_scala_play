@@ -31,7 +31,7 @@ class PaymentController @Inject()(cc: ControllerComponents, paymentDAO: PaymentD
       completedAt = None // ✅ Default to None
     )
     paymentDAO.createPayment(payment).map { id =>
-      Created(Json.obj("status" -> "success", "message" -> s"payment created: $id"))
+      Created(Json.obj("status" -> "success", "message" -> s"payment created: $id", "id" -> Json.toJson(id)))
     }.recover {
       case _ => InternalServerError(Json.obj("status" -> "error", "message" -> "payment could not be created"))
     }
@@ -59,7 +59,12 @@ class PaymentController @Inject()(cc: ControllerComponents, paymentDAO: PaymentD
     }
   }
 
-
+  def getPayment(id: Long) = Action.async { implicit request: Request[AnyContent] =>
+    paymentDAO.findPaymentById(id).map {
+      case Some(payment) => Ok(views.html.payment(payment))
+      case None => NotFound("Payment not found")
+    }
+  }
 }
 
 

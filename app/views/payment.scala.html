@@ -1,0 +1,24 @@
+@(payment: models.Payment)(implicit request: RequestHeader)
+
+
+@main("Payment Details"){
+<body>
+<div class="container-sm mt-2 justify-content-center">
+    <div class="w-50 ">
+        <h1 class="text-center">Payment Page</h1>
+        <h2>order id: @payment.orderId</h2>
+        <h2>Total Price: @payment.amount</h2>
+        <form action="">
+            <select class="form-control form-control-sm">
+                <option>Visa</option>
+                <option>BitCoin</option>
+                <option>Klarna</option>
+            </select>
+            <button type="submit" class="btn btn-success btn-sm">Pay</button>
+        </form>
+    </div>
+</div>
+
+
+</body>
+}
