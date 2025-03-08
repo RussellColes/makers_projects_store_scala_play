@@ -25,7 +25,7 @@ class CartItemViewDAO @Inject()(dbConfigProvider: DatabaseConfigProvider)(implic
 
     db.run(query.result).map { results =>
       results.map { case (cartItem, item) =>
-        CartItemView(cartItem.id.get, item.name, cartItem.quantity, item.price)
+        CartItemView(cartItem.id.get, cartItem.cartId,item.name, cartItem.quantity, item.price)
       }
     }
   }

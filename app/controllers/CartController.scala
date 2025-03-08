@@ -127,15 +127,47 @@ class CartController @Inject()(cc: ControllerComponents, cartDAO: CartDAO, cartI
   }
 
 
-//  ######CartItems logic#######
-  def updateCartItem(itemId: Long) = Action { implicit request =>
-    // TODO: Add logic to update the cart item quantity.
-    Ok(s"TBD.Cart item updated. Id: $itemId")
+  //  ######CartItems logic#######
+  def updateCartItem() = Action.async { implicit request =>
+    request.body.asFormUrlEncoded match {
+      case Some(formData) =>
+        val idOpt = formData.get("id").flatMap(_.headOption)
+        val quantityOpt = formData.get("quantity").flatMap(_.headOption)
+        val updatedQuantity: Int = quantityOpt.map(_.toInt).getOrElse(1)
+
+        idOpt match {
+          case Some(idStr) =>
+            val id = idStr.toLong
+            cartItemDAO.findById(id).flatMap {
+              case Some(existingCartItem) =>
+                val updatedCartItem = existingCartItem.copy(quantity = updatedQuantity)
+                cartItemDAO.updateCartItem(updatedCartItem).map { _ =>
+                  Redirect(routes.CartController.myCart())
+                }
+              case None =>
+                Future.successful(BadRequest("Cart item not found"))
+            }
+        }
+          case None =>
+            Future.successful(BadRequest("No cart item id provided"))
+      case None =>
+        Future.successful(Ok("No data received"))
+    }
   }
 
-  def deleteCartItem(itemId: Long) = Action { implicit request =>
-    // TODO: Replace with CartItemsDAO for deletion
-    Ok(s"TBD.Cart item deleted. Id: $itemId")
+  def deleteCartItem() = Action.async { implicit request =>
+    request.body.asFormUrlEncoded match {
+      case Some(formData) =>
+        val idOpt = formData.get("id").flatMap(_.headOption)
+        val id:Long = idOpt.getOrElse(
+          throw new IllegalArgumentException("Cart item id is required")
+        ).toLong
+        cartItemDAO.deleteCartItem(id).map { _ =>
+          Redirect(routes.CartController.myCart())
+        }
+      case None =>
+        Future.successful(BadRequest("Cart item not found"))
+    }
   }
 
 
