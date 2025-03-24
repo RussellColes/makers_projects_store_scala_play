@@ -1,4 +1,22 @@
 # The Makers Store (Scala Play)
+This group project was the second week of a two-week course teaching Scala and Play from absolute basics. 
+This is a clone of the original repository to allow me to update as appropriate without affecting my colleagues' versions.
+
+## Tech Stack
+The project used Scala, Play and a PostgreSQL relational database.
+
+## The Project
+The store allows users to register and sign in, view all products, add products to their basket and proceed to check out.
+I worked with four other people, mainly pair-programming over the course of a week to create a basic online store.
+I specifically focused on test-driving everything I wrote as this is something that could have been better in previous projects. 
+Not all of my colleagues did test drive their work, so the project as a whole does not have full test coverage. 
+I am however, very happy with the test coverage achieved in my own work.
+
+## Future Developments
+Were more time to be available, we would have liked to implement some more of the payments process. I would also like to improve the test coverage across the project.
+
+
+# Project Instructions from Makers are below:
 
 This project uses Scala 2.13.14 and Play 3.0.4.
 
