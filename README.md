@@ -1,9 +1,11 @@
 # The Makers Store (Scala Play)
+
 This group project was the second week of a two-week course teaching Scala and Play from absolute basics. 
 This is a clone of the original repository to allow me to update as appropriate without affecting my colleagues' versions.
 
 ## Tech Stack
-The project used Scala, Play and a PostgreSQL relational database.
+![Scala](https://img.shields.io/badge/Scala-E8D4D2?style=for-the-badge&logo=scala&logoColor=D73322) ![Play](https://img.shields.io/badge/Play-8ECB3A?style=for-the-badge&logo=play&logoColor=white) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-31648C?style=for-the-badge&logo=postgresql&logoColor=white)
+
 
 ## The Project
 The store allows users to register and sign in, view all products, add products to their basket and proceed to check out.
