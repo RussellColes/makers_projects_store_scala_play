@@ -6,5 +6,8 @@ target
 /.classpath
 /.project
 /.settings
+RUNNING_PID
+.DS_Store
+
 
 conf/application.local.conf
